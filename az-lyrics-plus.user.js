@@ -1,11 +1,10 @@
 // ==UserScript==
-// @name         AzLyrics+
+// @name         AzLyrics +
 // @namespace    http://twitter.com/BekirUzun
-// @version      0.1.3
+// @version      0.1.7
 // @description  Adds some extra functions to AzLyrics and changes theme
 // @author       BekirUzn
 // @match        *.azlyrics.com/*
-// @homepage     https://github.com/BekirUzun/AzLyricsPlus/
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js
 // @updateURL    https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
 // @downloadURL  https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
@@ -27,6 +26,7 @@
     var fontGlowColor = GM_getValue("fontGlowColor", '#0000FF');
     var linkGlowColor = GM_getValue("linkGlowColor", '#FF0000');
 	var boldFontGlowColor = GM_getValue("boldFontGlowColor", '#00FFFF');
+    var isJqueryLoaded;
     
 	var css ='.main-page {width: 90%; font-size: '+fontSize+'px !important; color: #FFF !important; letter-spacing: 1px !important; text-shadow: 0px 0px 5px '+fontGlowColor+', 0px 0px 10px '+fontGlowColor+', 0px 0px 15px '+fontGlowColor+', 0px 0px 20px '+fontGlowColor+', 0px 0px 30px '+fontGlowColor+' !important;}\
 		body, .navbar-footer, .footer-wrap {background-color: #000 !important; font-family: "Righteous", cursive !important;}\
@@ -45,7 +45,9 @@
 		.settings input {font-size: 12pt; color: #fff; font-family: "Open Sans", Helvetica, sans-serif; line-height: 2em; background: rgba(100, 100, 100, 0.25); border-radius: 4px; border: none; padding: 0em 0em 0em 0.3em; text-decoration: none; width: 90%;}\
 		input[type="color"] {background: rgba(0, 0, 0, 0); width: 92%; height: 2em; border: none; padding: 0em; position: relative;}\
 		.closeSettings {position: fixed; top:0px; right:0px; background-image: url("http://bekiruzun.com/test/1/assets/css/images/close.svg"); background-repeat: no-repeat; background-position: 1em 1em; width: 3em; height: 2em; cursor: pointer;}\
-        .openSettings {position: fixed; top:0px; right:0px; background-image: url("http://bekiruzun.com/test/1/assets/css/images/settings.svg"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99990; cursor: pointer;}';
+        .openSettings {position: fixed; top:0px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/gear-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99990; cursor: pointer;}\
+        .start {position: fixed; top:50px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/play-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99991; cursor: pointer;}\
+        .stop {position: fixed; top:50px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/stop-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99990; cursor: pointer;}';
 
     if (typeof GM_addStyle != "undefined") {
         GM_addStyle(css);
@@ -70,7 +72,10 @@
         var lines = divHeight / 42;
         return lines.toFixed(1);
     }
-
+    if($.fn.jquery  !== "undefined"){
+        isJqueryLoaded = true;
+    }
+    
     var path = window.location.pathname;
     if(path.includes("lyrics")){
         var holder = document.getElementsByTagName("h2")[0].getElementsByTagName("b")[0].innerHTML;
@@ -79,21 +84,13 @@
         document.getElementsByTagName("h2")[0].innerHTML = '<a href="' +artisturl+ '" ><font size="35px">' + holder + '</font></a>';
     }
 
-    var start = document.createElement ('div');
-    start.innerHTML = '<button id="start" style="position: fixed; right: 0px; bottom: 50px;" type="button">Start Sliding</button>';
-    document.body.appendChild (start);
+ //   var start = document.createElement ('div');
+ //   start.innerHTML = '<button id="start" style="position: fixed; right: 0px; bottom: 50px;" type="button">Start Sliding</button>';
+  //  document.body.appendChild (start);
 
-    document.getElementById ("start").addEventListener (
-        "click", function() {scrollDown(duration * 1000);}, false
-    );
-
-    var test1 = document.createElement ('div');
-    test1.innerHTML = '<button id="test1" style="position: fixed; right: 0px; bottom: 100px;" type="button">Count Lines</button>';
-    document.body.appendChild (test1);
-
-    document.getElementById ("test1").addEventListener ( "click", function() {
-        document.getElementsByTagName("h2")[0].innerHTML = 'Path: ' + path + '</br> Line count : ' + countLines();
-    }, false);
+  //  document.getElementById ("start").addEventListener (
+ //       "click", function() {scrollDown(duration * 1000);}, false
+  //  );
 
     var stop = document.createElement ('div');
     stop.innerHTML = '<button id="stop" style="position: fixed; right: 0px; bottom: 25px;" type="button">Stop Sliding</button>';
@@ -108,47 +105,43 @@
     settings.innerHTML = '<div class="settings"><table><tbody>\
 		<tr><td>Duration (seconds):</td><td><input id="duration" type="number" step="10" value="' + duration + '"></td>\
 		<tr><td>Font Size (px):</td><td><input id="fontSize" type="number" value="' + fontSize + '"></td></tr>\
-		<tr><td>Font Glow Color:</td><td><input id="fontGlowColor" onchange="changeToHex()" type="color" value="' + fontGlowColor + '"></td></tr>\
-		<tr><td>Bold Font Glow Color:</td><td><input id="boldFontGlowColor" onchange="changeToHex()" type="color" value="' + boldFontGlowColor + '"></td></tr>\
-		<tr><td>Link Glow Color:</td><td><input id="linkGlowColor" onchange="changeToHex()" type="color" value="' + linkGlowColor + '"></td></tr>\
-		<tr><td><button id="save" type="button">Save</button></td><td><button id="reset" type="button">Reset</button></td></tr></tbody></table>\
+		<tr><td>Font Glow Color:</td><td><input id="fontGlowColor" type="color" value="' + fontGlowColor + '"></td></tr>\
+		<tr><td>Bold Font Glow Color:</td><td><input id="boldFontGlowColor" type="color" value="' + boldFontGlowColor + '"></td></tr>\
+		<tr><td>Link Glow Color:</td><td><input id="linkGlowColor" type="color" value="' + linkGlowColor + '"></td></tr>\
+		<tr><td><button id="save" type="button">Save</button></td><td><button id="reset" type="button">Reset</button></td></tr>\
+        </tbody></table> <table><tbody><tr><td>JQuery loaded! Version: '+ $.fn.jquery +' </td></tr></tbody></table>\
 		<a class="closeSettings"></a>\
-	</div> <a id="openSettings" class="openSettings" ></a>';
+	</div> <a id="openSettings" class="openSettings" ></a> <a id="start" class="start"></a> <a id="stop" class="stop" ></a>';
     document.body.appendChild(settings);
 
-    $('.openSettings, .closeSettings').click(function(){
-        $(".settings").toggle(1000);
-    });
-
-    /*
-    var durationDiv = document.createElement ('div');
-    durationDiv.innerHTML = '<input id="duration" style="position: fixed; right: 0px; top: 0px;" type="number" value="' + duration + '">';
-    document.body.appendChild (durationDiv);
-
-
-    var setDurationDiv = document.createElement ('div');
-    setDurationDiv.innerHTML = '<button id="setDuration" style="position: fixed; right: 0px; top: 25px;" type="button">Set Duration (seconds) </button>';
-    document.body.appendChild (setDurationDiv);
-
-*/
-    document.getElementById("save").addEventListener("click", saveSettings, false );
-    document.getElementById("reset").addEventListener("click", resetSettings, false );
-    document.getElementById("fontGlowColor").addEventListener("change", changeToHex, false );
-    document.getElementById("fontGlowColorVal").addEventListener("input", changeToColor, false );
-
-    function setDurationFunc() {
-        duration = document.getElementById("duration").value;
-        GM_setValue(path, duration);
-    }
-    function changeToHex(){
-        document.getElementById("fontGlowColorVal").value = document.getElementById("fontGlowColor").value;
-    }
-    function changeToColor(){
-        document.getElementById("fontGlowColor").value = document.getElementById("fontGlowColorVal").value;
+    if(isJqueryLoaded){
+        $('.openSettings, .closeSettings').click(function(){
+            $(".settings").toggle(1000);
+        });
+        $('#save').click(saveSettings);
+        
+        $('#reset').click(resetSettings);
+        
+        $('.start').click(function(){
+            $(".start").toggle();
+            scrollDown(duration * 1000);
+        });
+        
+        $('.stop').click(function(){
+            $(".start").toggle();
+            clearInterval(timer);
+        });
+        
+    } else {
+        document.getElementsByClassName("openSettings")[0].addEventListener("click", toggleVisibility, false );
+        document.getElementsByClassName("closeSettings")[0].addEventListener("click", toggleVisibility, false );
+        document.getElementById("save").addEventListener("click", saveSettings, false );
+        document.getElementById("reset").addEventListener("click", resetSettings, false );
     }
 
-    function toggleVisibility(cl) {
-       var selected = document.getElementsByClassName(cl)[0];
+
+    function toggleVisibility() {
+       var selected = document.getElementsByClassName("settings")[0];
        if(selected.style.display == 'block')
           selected.style.display = 'none';
        else
@@ -156,19 +149,21 @@
     }
 
     function saveSettings() {
-        duration = document.getElementById("duration").value;
         fontSize = document.getElementById("fontSize").value;
         fontGlowColor = document.getElementById("fontGlowColor").value;
         linkGlowColor = document.getElementById("linkGlowColor").value;
         boldFontGlowColor = document.getElementById("boldFontGlowColor").value;
-        GM_setValue(path, duration);
+        if(document.getElementById("duration").value !== duration){
+            duration = document.getElementById("duration").value;
+            GM_setValue(path, duration);
+        }
         GM_setValue("fontSize", fontSize);
         GM_setValue("fontGlowColor", fontGlowColor);
         GM_setValue("linkGlowColor", linkGlowColor);
         GM_setValue("boldFontGlowColor", boldFontGlowColor);
+        alert('Settings Saved!');
     }
 
-    
     function resetEverything() {
         var keys = GM_listValues();
         alert(keys + keys.length);
@@ -185,7 +180,6 @@
         GM_deleteValue("boldFontGlowColor");
     }
 
-    
 
     var timer;
     function animate(elem,style,unit,from,to,time,prop) {
@@ -198,12 +192,16 @@
             } else {
                 elem.style[style] = (from+step*(to-from))+unit;
             }
-            if( step == 1) clearInterval(timer);
+            if( step == 1) {
+                $(".start").toggle();
+                clearInterval(timer);
+            }
         },25);
         elem.style[style] = from+unit;
     }
 
     function scrollDown(duration) {
+        
         var target = document.getElementById("addsong");
         animate(document.body, "scrollTop", "", document.body.scrollTop, target.offsetTop - window.innerHeight, duration, true);
     }
