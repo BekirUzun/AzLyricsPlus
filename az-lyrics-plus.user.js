@@ -5,6 +5,7 @@
 // @description  Adds some extra functions to AzLyrics and changes theme
 // @author       BekirUzn
 // @match        *.azlyrics.com/*
+// @homepage     https://github.com/BekirUzun/AzLyricsPlus/
 // @require      https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js
 // @updateURL    https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
 // @downloadURL  https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
