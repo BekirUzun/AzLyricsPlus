@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name	AzLyrics +
 // @namespace	http://twitter.com/BekirUzn
-// @version	0.1.7
+// @version	0.1.8
 // @description	Adds some extra functions to AzLyrics and changes theme
-// @author	BekirUzn
+// @author	Bekir Uzun
 // @match	*.azlyrics.com/*
 // @icon 	https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az_lyrics_plus_logo.png
 // @require	https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js
@@ -112,16 +112,24 @@
 		<tr><td><button id="save" type="button">Save</button></td><td><button id="reset" type="button">Reset</button></td></tr>\
         </tbody></table> <table><tbody><tr><td>JQuery loaded! Version: '+ $.fn.jquery +' </td></tr></tbody></table>\
 		<a class="closeSettings"></a>\
-	</div> <a id="openSettings" class="openSettings" ></a> <a id="start" class="start"></a> <a id="stop" class="stop" ></a>';
+	</div> <a id="openSettings" class="openSettings" ></a> <a class="start"></a> <a class="stop" ></a>';
     document.body.appendChild(settings);
 
     if(isJqueryLoaded){
         $('.openSettings, .closeSettings').click(function(){
             $(".settings").toggle(1000);
         });
-        $('#save').click(saveSettings);
+        $('#save').click(function(){
+            saveSettings(); 
+            window.location.reload(true);
+        });
         
-        $('#reset').click(resetSettings);
+        $('#reset').click(function(){
+            if(confirm("Do you really want to reset color settings and duration time?") === true) {
+                resetSettings();
+                window.location.reload(true);
+            }
+        });
         
         $('.start').click(function(){
             $(".start").toggle();
