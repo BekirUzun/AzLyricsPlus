@@ -1,0 +1,2 @@
+# AzLyricsPlus
+Userscript for AzLyrics
