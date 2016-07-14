@@ -1,19 +1,20 @@
 // ==UserScript==
-// @name         AzLyrics +
-// @namespace    http://twitter.com/BekirUzun
-// @version      0.1.7
-// @description  Adds some extra functions to AzLyrics and changes theme
-// @author       BekirUzn
-// @match        *.azlyrics.com/*
-// @require      https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js
-// @updateURL    https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
-// @downloadURL  https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
-// @grant        GM_addStyle
-// @grant        GM_setValue
-// @grant        GM_getValue
-// @grant        GM_deleteValue
-// @grant        GM_listValues
-// @grant        unsafeWindow
+// @name	AzLyrics +
+// @namespace	http://twitter.com/BekirUzn
+// @version	0.1.7
+// @description	Adds some extra functions to AzLyrics and changes theme
+// @author	BekirUzn
+// @match	*.azlyrics.com/*
+// @icon 	https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az_lyrics_plus_logo.png
+// @require	https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js
+// @updateURL	https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
+// @downloadURL	https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
+// @grant	GM_addStyle
+// @grant	GM_setValue
+// @grant	GM_getValue
+// @grant	GM_deleteValue
+// @grant	GM_listValues
+// @grant	unsafeWindow
 // ==/UserScript==
 
 /*jshint multistr: true */
