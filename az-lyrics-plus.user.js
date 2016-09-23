@@ -4,7 +4,8 @@
 // @version     1.0.0
 // @author      Bekir Uzun
 // @namespace   https://greasyfork.org/en/scripts/21458-azlyrics
-// @match       *.azlyrics.com/*
+// @match       http://*.azlyrics.com/*
+// @match       http://azlyrics.com/*
 // @run-at      document-start
 // @license     https://creativecommons.org/licenses/by-sa/4.0/
 // @icon        https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az_lyrics_plus_logo.png
