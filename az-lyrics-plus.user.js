@@ -1,17 +1,18 @@
 // ==UserScript==
 // @name	AzLyrics +
-// @description Adds some extra functions to AzLyrics and changes theme
-// @version     1.0.0
+// @description Adds some extra functions to AzLyrics, changes theme and removes adds
+// @version     1.7.2
 // @author      Bekir Uzun
 // @namespace   https://greasyfork.org/en/scripts/21458-azlyrics
-// @match       http://*.azlyrics.com/*
-// @match       http://azlyrics.com/*
+// @match       http://www.azlyrics.com/*
 // @run-at      document-start
 // @license     https://creativecommons.org/licenses/by-sa/4.0/
 // @icon        https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az_lyrics_plus_logo.png
 // @homepage	https://github.com/BekirUzun/AzLyricsPlus
 // @supportURL  https://github.com/BekirUzun/AzLyricsPlus/issues
 // @require     https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js
+// @updateURL	https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
+// @downloadURL	https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az-lyrics-plus.user.js
 // @grant       GM_addStyle
 // @grant   	GM_setValue
 // @grant   	GM_getValue
@@ -19,214 +20,297 @@
 // @grant   	GM_listValues
 // @grant   	unsafeWindow
 // ==/UserScript==
-/*jshint multistr: true */
+/*jshint multistr: true, newcap: false */
 (function() {
-    'use strict';
+	'use strict';
 
-    var fontSize = GM_getValue("fontSize", '30');
-    var fontGlowColor = GM_getValue("fontGlowColor", '#0000FF');
-    var linkGlowColor = GM_getValue("linkGlowColor", '#FF0000');
-    var boldFontGlowColor = GM_getValue("boldFontGlowColor", '#00FFFF');
-    var backgroundColor = GM_getValue("backgroundColor", '#000000');
-    var duration, duration_copy, path;
+	// disable script in Iframes
+	if (window.self!==window.top) { return; }
 
-    var css = '.main-page {width: 90%; font-size: ' + fontSize + 'px !important; color: #FFF !important; letter-spacing: 1px !important; text-shadow: 0px 0px 5px ' + fontGlowColor + ', 0px 0px 10px ' + fontGlowColor + ', 0px 0px 15px ' + fontGlowColor + ', 0px 0px 20px ' + fontGlowColor + ', 0px 0px 30px ' + fontGlowColor + ' !important;}\
-		body, .navbar-footer, .footer-wrap {background: ' + backgroundColor + '; font-family: "Righteous", cursive !important; line-height: 1.4 !important;}\
-		.main-page a {color: #FFF !important; text-shadow: 0px 0px 5px ' + linkGlowColor + ', 0px 0px 10px ' + linkGlowColor + ', 0px 0px 15px ' + linkGlowColor + ', 0px 0px 20px ' + linkGlowColor + ', 0px 0px 30px ' + linkGlowColor + ' !important;}\
-		.main-page b {color: #FFF !important; text-shadow: 0px 0px 5px ' + boldFontGlowColor + ', 0px 0px 10px ' + boldFontGlowColor + ', 0px 0px 15px ' + boldFontGlowColor + ', 0px 0px 20px ' + boldFontGlowColor + ', 0px 0px 30px ' + boldFontGlowColor + ' !important;}\
-		.navbar-default {background-color: #55F !important; border-color: #66F !important;}\
-		.btn-menu, .btn-primary { background-color: #00F !important; border-color: #00A !important; margin: 1px !important;}\
-		.btn-default, .breadcrumb, .panel.album-panel {background-color: #222 !important; border-color: #800 !important;}\
-		.btn.focus, .btn:focus, .btn:hover {background-color: #008 !important; border-color: #008 !important;}\
-		.lboard-wrap, .links-menu-wrap {background-color: #33D !important; padding-bottom: 10px !important;}\
-		@font-face {font-family: "Righteous"; font-style: normal; font-weight: 400; src: local("Righteous"), local("Righteous-Regular"), url(https://fonts.gstatic.com/s/righteous/v5/w5P-SI7QJQSDqB3GziL8XVtXRa8TVwTICgirnJhmVJw.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;}\
-		.settings {font-size: 12pt; width: 25em; position: fixed; top: 0px; right: 0px; background: #21B262; color: #ffffff; height: 100%; z-index: 99995; font-family: "Open Sans", Helvetica, sans-serif;  display: none; padding: 40px 10px 10px 10px;}\
-		.settings table {width: 100%;}\
-		.settings td {padding: 0.2em 0 0 0; width: 50%; line-height: 2em;}\
-		.settings button {background-color: #ed4933; box-shadow: none !important; width: 90%; height: 2.0em; color: #fff; font-family: "Open Sans", Helvetica, sans-serif;	font-size: 15pt; font-weight: 400; letter-spacing: 0.1em; border-radius: 4px; border: none; cursor: pointer;}\
-		.settings input {font-size: 12pt; color: #fff; font-family: "Open Sans", Helvetica, sans-serif; line-height: 2em; background: rgba(100, 100, 100, 0.25); border-radius: 4px; border: none; padding: 0em 0em 0em 0.3em; text-decoration: none; width: 90%;}\
-		input[type="color"] {background: rgba(0, 0, 0, 0); width: 92%; height: 2em; border: none; padding: 0em; position: relative;}\
-		.closeSettings {position: fixed; top:0px; right:0px; background-image: url("http://bekiruzun.com/test/1/assets/css/images/close.svg"); background-repeat: no-repeat; background-position: 1em 1em; width: 3em; height: 2em; cursor: pointer;}\
-        .openSettings {position: fixed; top:0px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/gear-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99990; cursor: pointer;}\
-        .start {position: fixed; top:50px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/play-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99991; cursor: pointer;}\
-        .stop {position: fixed; top:50px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/stop-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99990; cursor: pointer;}';
+	var initial_settings = {"light_mode": false, "font_size": 30, "block_ads": false, "background": {"type":"color", "shadow":true, "filter": "none", "image":"http://s21.postimg.org/klu7ak9mt/image.jpg", "video":"https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4", "filters":["grayscale(70%)", "grayscale(100%) blur(3px)", "grayscale(50%) blur(5px) brightness(70%)"], "images": ["https://s10.postimg.org/cfo4eg5mx/image.jpg","https://s21.postimg.org/qb8bgmy91/image.jpg","https://s12.postimg.org/783o9ixmj/image.jpg", "https://s21.postimg.org/klu7ak9mt/image.jpg"], "videos": ["https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4", "https://giant.gfycat.com/PartialSlowIriomotecat.mp4", "https://giant.gfycat.com/BestUncomfortableBagworm.mp4"] }, "colors": {"font_glow":"#0000FF", "bold_font_glow":"#00FFFF", "link_glow":"#FF0000", "background":"#000000" }};
+	var settings = GM_getValue("settings", JSON.stringify(initial_settings));
+	settings = JSON.parse(settings);
 
-    if (typeof GM_addStyle != "undefined") {
-        GM_addStyle(css);
-    } else if (typeof PRO_addStyle != "undefined") {
-        PRO_addStyle(css);
-    } else if (typeof addStyle != "undefined") {
-        addStyle(css);
-    } else {
-        var node = document.createElement("style");
-        node.type = "text/css";
-        node.appendChild(document.createTextNode(css));
-        var head = document.getElementsByTagName("head");
-        if (head.length > 0) {
-            head[0].appendChild(node);
-        } else {
-            document.documentElement.appendChild(node);
-        }
-    }
+	var duration, duration_copy, backgroundImage_copy = "", path, sliding = false;
 
-    //Thanks to Brock Adams @  http://stackoverflow.com/questions/26268816/how-to-get-a-greasemonkey-script-to-run-both-at-run-at-document-start-and-at-r#answer-26269087
-    document.addEventListener("DOMContentLoaded", DOM_ContentReady);
+	function calculateDuration() {
+		var duration, lines, height;
+		height =  $('body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)').height();
+		lines = height / ( settings.font_size * 1.4 );
+		duration = (lines * 5 ).toFixed(1);
+		console.log( height, lines, duration );
+		if (lines < 0)
+			duration = 0.5;
+		return duration;
+	}
 
-    function DOM_ContentReady() {
-        path = window.location.pathname;
-        if (path.includes("lyrics")) {
-            var holder = document.getElementsByTagName("h2")[0].getElementsByTagName("b")[0].innerHTML;
-            var patharray = path.split("/");
-            var artisturl = "/" + patharray[2].charAt(0) + "/" + patharray[2] + ".html";
-            document.getElementsByTagName("h2")[0].innerHTML = '<a href="' + artisturl + '" ><font size="35px">' + holder + '</font></a>';
-        }
-        document.getElementsByClassName("pull-left")[0].src = 'https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az_lyrics_plus_logo.png';
+	function reCalculateDuration() {
+		duration = duration_copy - ($( document ).scrollTop() / (settings.font_size * 1.4 )) * 6;
+		if (duration <= 0)
+			duration = 0.5;
+		document.getElementById("duration").value = duration.toFixed(1);
+	}
 
-        duration = GM_getValue(path, calcDuration());
-        duration_copy = duration;
-        var settings = document.createElement('div');
-        settings.innerHTML = '<div class="settings"><table><tbody>\
-		<tr><td>Duration (seconds):</td><td><input id="duration" type="number" step="10" value="' + duration + '"></td>\
-		<tr><td>Font Size (px):</td><td><input id="fontSize" type="number" value="' + fontSize + '"></td></tr>\
-		<tr><td>Font Glow Color:</td><td><input id="fontGlowColor" type="color" value="' + fontGlowColor + '"></td></tr>\
-		<tr><td>Bold Font Glow Color:</td><td><input id="boldFontGlowColor" type="color" value="' + boldFontGlowColor + '"></td></tr>\
-		<tr><td>Link Glow Color:</td><td><input id="linkGlowColor" type="color" value="' + linkGlowColor + '"></td></tr>\
-		<tr><td>Background Color:</td><td><input id="backgroundColor" type="color" value="' + backgroundColor + '"></td></tr>\
-		<tr><td><button id="save" type="button">Save</button></td><td><button id="reset" type="button">Reset</button></td></tr>\
-        </tbody></table> <table><tbody><tr><td>JQuery version: ' + $.fn.jquery + ' </td></tr></tbody></table>\
-		<a class="closeSettings"></a>\
-        </div>  <a id="openSettings" class="openSettings" ></a> <a class="start"></a> <a class="stop">';
-        document.body.appendChild(settings);
+	function clearAds() {
+		$('.sky-ad, .top-ad, .fb-like, #cf_fb_id,  .ringtone, .col-xs-12.col-lg-8.text-center > div:nth-child(2), #fb-root, .col-xs-12.col-lg-8.text-center > .noprint.hidden-xs').hide().remove();
+	}
 
-        if ($.fn.jquery !== "undefined") {
-            $('.openSettings, .closeSettings').click(function() {
-                $(".settings").toggle(1000);
-            });
-            $('.main-page').click(function() {
-                $(".settings").hide(1000);
-            });
+	function saveSettings() {
+		settings.font_size = document.getElementById("font-size").value;
+		settings.colors.font_glow = document.getElementById("font-glow-color").value;
+		settings.colors.link_glow = document.getElementById("link-glow-color").value;
+		settings.colors.bold_font_glow = document.getElementById("bold-font-glow-color").value;
+		settings.background.type = document.getElementById("background-type").value;
+		settings.background.filter = document.getElementById("background-filter").value;
+		if(document.getElementById("background-type").value == "color" )
+			settings.colors.background = document.getElementById("background-color").value;
+		else if(document.getElementById("background-type").value == "image" )
+			settings.background.image = document.getElementById("background-image").value;
+		else if(document.getElementById("background-type").value == "video" )
+			settings.background.video = document.getElementById("background-video").value;
 
-            $('#save').click(function() {
-                saveSettings();
-                window.location.reload(true);
-            });
-            $('#reset').click(function() {
-                if (confirm("Do you really want to reset color settings on all pages and duration time on current page?") === true) {
-                    resetSettings();
-                    window.location.reload(true);
-                }
-            });
-            $(".start").click(function() {
-                $(".start").toggle();
-                $('html, body').animate({
-                    scrollTop: $("#addsong").offset().top - window.innerHeight
-                }, {
-                    duration: duration * 1000,
-                    easing: 'linear',
-                    complete: function() {
-                        $(".start").show();
-                    }
-                });
-            });
-            $(".stop").click(function() {
-                $(".start").toggle();
-                $('html, body').stop();
-            });
-            $( window ).scroll(function() {
-                if (GM_getValue(path, 0) === 0){
-                    var height =  $('#addsong').offset().top -  $(document).scrollTop() - window.innerHeight;
-                    var lines = height / fontSize * 1.4;
-                    duration = (lines * 2.5);
-                } else {
-                    duration = duration_copy - ($(document).scrollTop() / fontSize * 1.4) * 2.5;
-                }
+		if (document.getElementById("duration").value != duration) {
+			duration = document.getElementById("duration").value;
+			GM_setValue(path, duration);
+		}
+		settings.background.shadow = document.getElementById("bg-shadow").checked;
+		GM_setValue("settings", JSON.stringify(settings));
+	}
 
-                if (duration <= 0)
-                    duration = 0.5;
-                document.getElementById("duration").value = duration.toFixed(1);
+	function resetEverything() {
+		var keys = GM_listValues();
+		alert(keys + keys.length);
+		for (var i = 0; i < keys.length; i++) {
+			GM_deleteValue(keys[i]);
+		}
+	}
 
-            });
-        } else {
-            document.getElementsByClassName("openSettings")[0].addEventListener("click", toggleVisibility, false);
-            document.getElementsByClassName("closeSettings")[0].addEventListener("click", toggleVisibility, false);
-            document.getElementById("save").addEventListener("click", saveSettings, false);
-            document.getElementById("reset").addEventListener("click", resetSettings, false);
-        }
-    }
+	function resetSettings() {
+		GM_deleteValue(path);
+		GM_deleteValue("settings");
+	}
 
-    function calcDuration() {
-        var dur,height =  $('#addsong').offset().top -  $(document).scrollTop() - window.innerHeight;
-        var lines = height / fontSize * 1.4;
-        if (lines > 0)
-            dur = (lines * 2.5).toFixed(1);
-        else
-            dur = 0.5;
-        return dur;
-    }
+	var css = '.main-page {width: 90%; font-size: ' + settings.font_size + 'px !important; color: #FFF !important; letter-spacing: 1px !important; text-shadow: 0px 0px 5px ' + settings.colors.font_glow + ', 0px 0px 10px ' + settings.colors.font_glow + ', 0px 0px 15px ' + settings.colors.font_glow + ', 0px 0px 20px ' + settings.colors.font_glow + ', 0px 0px 30px ' + settings.colors.font_glow + ' !important;}\
+body, .navbar-footer, .footer-wrap {background: rgba(0,0,0,0.8) !important; font-family: "Righteous", cursive !important; line-height: 1.4 !important;}\
+body {background: ' + settings.colors.background + ' !important; }\
+.main-page a {color: #FFF !important; text-shadow: 0px 0px 5px ' + settings.colors.link_glow + ', 0px 0px 10px ' + settings.colors.link_glow  + ', 0px 0px 15px ' + settings.colors.link_glow  + ', 0px 0px 20px ' + settings.colors.link_glow  + ', 0px 0px 30px ' + settings.colors.link_glow  + ' !important;}\
+.main-page b {color: #FFF !important; text-shadow: 0px 0px 5px ' + settings.colors.bold_font_glow + ', 0px 0px 10px ' + settings.colors.bold_font_glow  + ', 0px 0px 15px ' + settings.colors.bold_font_glow + ', 0px 0px 20px ' + settings.colors.bold_font_glow + ', 0px 0px 30px ' + settings.colors.bold_font_glow + ' !important;}\
+.navbar-default {background-color: #55F !important; border-color: #66F !important;}\
+.comment { color: ddd !important}\
+.btn-menu, .btn-primary { background-color: #00F !important; border-color: #00A !important; margin: 1px !important;}\
+.btn-default, .breadcrumb, .panel.album-panel {background-color: #222 !important; border-color: #800 !important;}\
+.btn.focus, .btn:focus, .btn:hover {background-color: #008 !important; border-color: #008 !important;}\
+.lboard-wrap, .links-menu-wrap {background-color: #33D !important; padding-bottom: 10px !important; position: relative; z-index: 5; }\
+@font-face {font-family: "Righteous"; font-style: normal; font-weight: 400; src: local("Righteous"), local("Righteous-Regular"), url(https://fonts.gstatic.com/s/righteous/v5/w5P-SI7QJQSDqB3GziL8XVtXRa8TVwTICgirnJhmVJw.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;}\
+.settings {font-size: 12pt; width: 25em; position: fixed; top: 0px; right: 0px; background: #21B262; color: #ffffff; height: 100%; z-index: 99995; font-family: "Open Sans", Helvetica, sans-serif;  display: none; padding: 30px 20px 10px 20px;}\
+.settings table {width: 100%;}\
+.settings td {padding: 3px 5px 3px 5px; line-height: 1.5em;}\
+.settings td:nth-child(even) { text-align: center; }\
+.settings tr:nth-child(even){ background: rgba(0,0,0,0.1); }\
+.settings td.buttons { width: 50%; padding: 5px 20px 5px 20px; }\
+.settings button {background-color: #ed4933; box-shadow: none !important; width: 90%; height: 1.5em; color: #fff; font-family: "Open Sans", Helvetica, sans-serif;	font-size: 14pt; font-weight: 400; letter-spacing: 0.1em; border: none; cursor: pointer;}\
+.settings input, .settings select {font-size: 12pt; color: #fff; font-family: "Open Sans", Helvetica, sans-serif; line-height: 1.5em; height: 1.5em; background: rgba(100, 100, 100, 0.25); border: none; padding: 0em 0em 0em 0.3em; text-decoration: none; width: 100px; }\
+.settings input[type="color"] {background: rgba(0, 0, 0, 0); height: 1.5em; border: none; padding: 0em; position: relative;}\
+.settings input[type="checkbox"]:checked + label:before { background: #0F0; color: #fff; content: "✔";}\
+.settings input[type="checkbox"] + label:before { background: rgba(150,178,150,1);  content: "X"; color: rgba(150,178,150,1); display: inline-block; height: 1.5em; line-height: 1.5em; text-align: center; width: 1.5em; }\
+.settings input[type="checkbox"] { -moz-appearance: none; -webkit-appearance: none; appearance: none; display: block; float: left; margin-right: -2em; opacity: 0; width: 1em; z-index: -1;}\
+.settings label {margin: 0 !important;}\
+.pre-defined { width: initial !important; margin-right: 5px;}\
+.closeSettings {position: fixed; top:0px; right:0px; background-image: url("http://bekiruzun.com/test/1/assets/css/images/close.svg"); background-repeat: no-repeat; background-position: 1em 1em; width: 3em; height: 2em; cursor: pointer;}\
+.openSettings {position: fixed; top:0px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/gear-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99990; cursor: pointer;}\
+.start {position: fixed; top:50px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/play-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99991; cursor: pointer;}\
+.stop {position: fixed; top:50px; right:0px; background-image: url("https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/img/stop-icon.png"); background-size: 40px; background-repeat: no-repeat; background-position: 0px 10px; width: 50px; height:50px; z-index: 99990; cursor: pointer;}';
 
-    function toggleVisibility() {
-        var selected = document.getElementsByClassName("settings")[0];
-        if (selected.style.display == 'block')
-            selected.style.display = 'none';
-        else
-            selected.style.display = 'block';
-    }
+	var html = {
+		"bg_inputs":['<td>Background Color:</td><td><input id="background-color" type="color" value="' + settings.colors.background + '"></td>',
+					 '<td>Background Image Url:</td><td><select id="pre-defined-images" class="pre-defined"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select><input id="background-image" type="text" value="' + settings.background.image + '"></td>',
+					 '<td>Background Video Url:</td><td><select id="pre-defined-videos" class="pre-defined"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select><input id="background-video" type="text" value="' + settings.background.video + '"></td>'],
+		"bg_type_select": "",
+		"bg_input":"",
+		"bg":"",
+		"bg_shadow":"",
+		"pre_defined":'<option value="0">1</option><option value="1">2</option><option value="2">3</option>'};
 
-    function saveSettings() {
-        fontSize = document.getElementById("fontSize").value;
-        fontGlowColor = document.getElementById("fontGlowColor").value;
-        linkGlowColor = document.getElementById("linkGlowColor").value;
-        boldFontGlowColor = document.getElementById("boldFontGlowColor").value;
-        backgroundColor = document.getElementById("backgroundColor").value;
-        if (document.getElementById("duration").value !== duration) {
-            duration = document.getElementById("duration").value;
-            GM_setValue(path, duration);
-        }
-        GM_setValue("fontSize", fontSize);
-        GM_setValue("fontGlowColor", fontGlowColor);
-        GM_setValue("linkGlowColor", linkGlowColor);
-        GM_setValue("boldFontGlowColor", boldFontGlowColor);
-        GM_setValue("backgroundColor", backgroundColor);
-    }
+	if(settings.block_ads){
+		css += '.sky-ad, .top-ad, .fb-like, .ringtone{ display: none !important; width: 0px !important; height: 0px !important}';
+		clearAds();
+	}
 
-    function resetEverything() {
-        var keys = GM_listValues();
-        alert(keys + keys.length);
-        for (var i = 0; i < keys.length; i++) {
-            GM_deleteValue(keys[i]);
-        }
-    }
+	if(settings.background.shadow){
+		html.bg_shadow = '<input id="bg-shadow" name="bg-shadow" type="checkbox" checked><label for="bg-shadow"><label>';
+		css += '.col-xs-12.col-lg-8.text-center { background: rgba(0,0,0,0.6) !important; box-shadow: 0 0 100px 100px rgba(0, 0, 0, 0.6) !important; }';
+	} else
+		html.bg_shadow = '<input id="bg-shadow" name="bg-shadow" type="checkbox"><label for="bg-shadow"><label>';
 
-    function resetSettings() {
-        GM_deleteValue(path);
-        GM_deleteValue("fontSize");
-        GM_deleteValue("fontGlowColor");
-        GM_deleteValue("linkGlowColor");
-        GM_deleteValue("boldFontGlowColor");
-    }
+	if(settings.background.type == "color"){
+		html.bg_type_select = '<select id="background-type"><option value="color" selected>Color</option> <option value="image">Image</option><option value="video">Video</option></select>';
+		html.bg_input = html.bg_inputs[0];
+	} else if(settings.background.type == "image"){
+		css += '.bg-div { background: '+ settings.colors.background +' url('+ settings.background.image +') no-repeat fixed; background-size: cover; filter: '+ settings.background.filter +'; position: fixed; top: 0px; left: 0px; width: 100%; height:100%; z-index: -10; }';
+		html.bg = '<div class="bg-div"></div>';
+		html.bg_type_select = '<select id="background-type"><option value="color">Color</option><option value="image" selected>Image</option><option value="video">Video</option></select>';
+		html.bg_input = html.bg_inputs[1];
+	} else if(settings.background.type == "video"){
+		css += '#bg-vid { filter: '+ settings.background.filter +'; position: fixed; top: 0px; left: 0px; width: 100%; z-index: -10; }';
+		html.bg = '<video id="bg-vid" autoplay loop poster="true"><source data-ng-src="'+ settings.background.video +'" src="'+ settings.background.video +'"></video>';
+		html.bg_type_select = '<select id="background-type"><option value="color">Color</option><option value="image">Image</option><option value="video" selected>Video</option></select>';
+		html.bg_input = html.bg_inputs[2];
+	}
 
-    var timer;
-    function animate(elem, style, unit, from, to, time, prop) {
-        if (!elem) return;
-        var start = new Date().getTime();
-        timer = setInterval(function() {
-            var step = Math.min(1, (new Date().getTime() - start) / time);
-            if (prop) {
-                elem[style] = (from + step * (to - from)) + unit;
-            } else {
-                elem.style[style] = (from + step * (to - from)) + unit;
-            }
-            if (step == 1) {
-                $(".start").toggle();
-                clearInterval(timer);
-            }
-        }, 25);
-        elem.style[style] = from + unit;
-    }
+	if (typeof GM_addStyle != "undefined") {
+		GM_addStyle(css);
+	} else if (typeof PRO_addStyle != "undefined") {
+		PRO_addStyle(css);
+	} else if (typeof addStyle != "undefined") {
+		addStyle(css);
+	} else {
+		var node = document.createElement("style");
+		node.type = "text/css";
+		node.appendChild(document.createTextNode(css));
+		var head = document.getElementsByTagName("head");
+		if (head.length > 0) {
+			head[0].appendChild(node);
+		} else {
+			document.documentElement.appendChild(node);
+		}
+	}
 
-    function scrollDown(duration) {
-        var target = document.getElementById("addsong");
-        animate(document.body, "scrollTop", "", document.body.scrollTop, target.offsetTop - window.innerHeight, duration, true);
-    }
+	//Thanks to Brock Adams @  http://stackoverflow.com/questions/26268816/how-to-get-a-greasemonkey-script-to-run-both-at-run-at-document-start-and-at-r#answer-26269087
+	document.addEventListener("DOMContentLoaded", DOM_ContentReady);
 
+	function DOM_ContentReady() {
+		path = window.location.pathname;
+		if (path.includes("lyrics")) {
+			var holder = document.getElementsByTagName("h2")[0].getElementsByTagName("b")[0].innerHTML;
+			var patharray = path.split("/");
+			var artisturl = "/" + patharray[2].charAt(0) + "/" + patharray[2] + ".html";
+			document.getElementsByTagName("h2")[0].innerHTML = '<a href="' + artisturl + '" ><font size="35px">' + holder + '</font></a>';
+		}
+		document.getElementsByClassName("pull-left")[0].src = 'https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az_lyrics_plus_logo.png';
+
+		var duration_interval = setInterval(function(){
+			duration = GM_getValue(path, calculateDuration());
+			duration_copy = duration;
+			if(duration > 0)
+				reCalculateDuration();
+			clearInterval(duration_interval);
+		}, 100);
+
+		var settingsOutterDiv = document.createElement('div');
+		settingsOutterDiv.innerHTML = '<div class="settings"><table class="settings-table"><tbody>\
+<tr><td>Duration (seconds):</td><td><input id="duration" type="number" step="10" value=""></td>\
+<tr><td>Font Size (px):</td><td><input id="font-size" type="number" value="' + settings.font_size + '"></td></tr>\
+<tr><td>Font Glow Color:</td><td><input id="font-glow-color" type="color" value="' + settings.colors.font_glow + '"></td></tr>\
+<tr><td>Bold Font Glow Color:</td><td><input id="bold-font-glow-color" type="color" value="' + settings.colors.bold_font_glow + '"></td></tr>\
+<tr><td>Link Glow Color:</td><td><input id="link-glow-color" type="color" value="' + settings.colors.link_glow + '"></td></tr>\
+<tr><td>Background Type:</td><td>'+ html.bg_type_select +'</td></tr>\
+<tr id="bg-input">'+ html.bg_input +'</tr>\
+<tr><td>Background Shadow:</td><td>'+ html.bg_shadow +'</td></tr>\
+<tr><td>Background Filters:</td><td><select id="pre-defined-filters" class="pre-defined"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select><input id="background-filter" type="text" value="' + settings.background.filter + '"></td></tr>\
+<tr style="margin-top: 5px;"><td class="buttons"><button id="save" type="button">Save</button></td><td class="buttons"><button id="reset" type="button">Reset</button></td></tr>\
+</tbody></table> <a class="closeSettings"></a>\
+</div>  <a id="openSettings" class="openSettings" ></a> <a class="start"></a> <a class="stop">';
+		document.body.appendChild(settingsOutterDiv);
+		if(settings.background.type != "color"){
+			$('body').prepend(html.bg);
+		}
+		/* TODO (maybe): Split lyrics into two containers
+		setTimeout( function() {
+            var lyrics = document.querySelector("body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)").outerHTML;
+			lyrics = lyrics.replace(/(\r\n|\n|\r)/gm,"");
+			var lyrics_array = lyrics.split("<br><br>");
+			var left_html = '', right_html = '';
+			for( var i = 0; i < lyrics_array.length; i++){
+				if(i%2 === 0){
+					left_html += lyrics_array[i] + '<br><br>';
+				} else {
+					right_html += lyrics_array[i] + '<br><br>';
+				}
+			}
+			$("body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)").html('<div class="left">'+ left_html +'</div><div class="right">'+ right_html +'</div>');
+        }, 250);
+*/
+		if(settings.background.type == "video")
+			document.getElementById("bg-vid").playbackRate = 0.7;
+
+		if ($.fn.jquery !== "undefined") {
+			$('.openSettings, .closeSettings').click(function() {
+				reCalculateDuration();
+				$(".settings").toggle(1000);
+			});
+			$('.main-page').click(function() {
+				$(".settings").hide(1000);
+			});
+			$('#save').click(function() {
+				saveSettings();
+				window.location.reload(true);
+			});
+			$('#reset').click(function() {
+				if (confirm("Do you really want to reset color settings on all pages and duration time on current page?") === true) {
+					resetSettings();
+					window.location.reload(true);
+				}
+			});
+			$('.start').click(function() {
+				$('.start').toggle();
+				reCalculateDuration();
+				var lyrics_height = $('body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)').height();
+				var lyrics_position = $('body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)').offset().top;
+				var one_line_height = settings.font_size * 1.4;
+				$('html, body').animate({
+					scrollTop: lyrics_height + lyrics_position + one_line_height * 2.5 - window.innerHeight
+				}, {
+					duration: duration * 1000,
+					easing: 'linear',
+					complete: function() {
+						$(".start").show();
+					}
+				});
+			});
+			$(".stop").click(function() {
+				$(".start").toggle();
+				$('html, body').stop();
+				reCalculateDuration();
+			});
+			$("#background-type").change(function() {
+				var selected = $("#background-type option:selected").val();
+				if (selected == "color"){
+					$("#bg-input").html(html.bg_inputs[0]);
+				} else if (selected == "image"){
+					$("#bg-input").html(html.bg_inputs[1]);
+					$("#pre-defined-images").change(function() {
+						var index = $("#pre-defined-images option:selected").val();
+						$("#background-image").val(settings.background.images[index]);
+					});
+				} else if (selected == "video"){
+					$("#bg-input").html(html.bg_inputs[2]);
+					$("#pre-defined-videos").change(function() {
+						var index = $("#pre-defined-videos option:selected").val();
+						$("#background-video").val(settings.background.videos[index]);
+					});
+				}
+			});
+			$("#pre-defined-filters").change(function() {
+				var index = $("#pre-defined-filters option:selected").val();
+				$("#background-filter").val(settings.background.filters[index]);
+			});
+			if(settings.background.type == "image"){
+				$("#pre-defined-images").change(function() {
+					var index = $("#pre-defined-images option:selected").val();
+					$("#background-image").val(settings.background.images[index]);
+				});
+			} else if(settings.background.type == "video"){
+				$("#pre-defined-videos").change(function() {
+					var index = $("#pre-defined-videos option:selected").val();
+					$("#background-video").val(settings.background.videos[index]);
+				});
+			}
+			$( window ).scroll(function() {
+				if(!settings.light_mode){
+					reCalculateDuration();
+				}
+			});
+			clearAds();
+		}
+	}
 })();
