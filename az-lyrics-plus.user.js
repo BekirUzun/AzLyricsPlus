@@ -1,5 +1,5 @@
 // ==UserScript==
-// @name	AzLyrics + New
+// @name	AzLyrics +
 // @description Adds some extra functions to AzLyrics, changes theme and removes adds
 // @version     1.8.9
 // @author      Bekir Uzun
