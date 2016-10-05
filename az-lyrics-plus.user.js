@@ -1,7 +1,7 @@
 // ==UserScript==
-// @name	AzLyrics +
+// @name	AzLyrics + New
 // @description Adds some extra functions to AzLyrics, changes theme and removes adds
-// @version     1.7.2
+// @version     1.8.9
 // @author      Bekir Uzun
 // @namespace   https://greasyfork.org/en/scripts/21458-azlyrics
 // @match       http://www.azlyrics.com/*
@@ -62,6 +62,7 @@
 		settings.colors.bold_font_glow = document.getElementById("bold-font-glow-color").value;
 		settings.background.type = document.getElementById("background-type").value;
 		settings.background.filter = document.getElementById("background-filter").value;
+
 		if(document.getElementById("background-type").value == "color" )
 			settings.colors.background = document.getElementById("background-color").value;
 		else if(document.getElementById("background-type").value == "image" )
@@ -74,6 +75,19 @@
 			GM_setValue(path, duration);
 		}
 		settings.background.shadow = document.getElementById("bg-shadow").checked;
+
+		if (document.getElementById("light-mode").checked != settings.light_mode) {
+			if(document.getElementById("light-mode").checked){
+				GM_setValue("settings_normal_mode", JSON.stringify(settings)); // save old settings
+				settings.background.shadow = false;
+				settings.background.filter = "none";
+				settings.background.type = "color";
+				settings.light_mode = true;
+			} else {
+				settings = GM_getValue("settings_normal_mode", JSON.stringify(settings));
+				settings = JSON.parse(settings);
+			}
+		}
 		GM_setValue("settings", JSON.stringify(settings));
 	}
 
@@ -90,7 +104,7 @@
 		GM_deleteValue("settings");
 	}
 
-	var css = '.main-page {width: 90%; font-size: ' + settings.font_size + 'px !important; color: #FFF !important; letter-spacing: 1px !important; text-shadow: 0px 0px 5px ' + settings.colors.font_glow + ', 0px 0px 10px ' + settings.colors.font_glow + ', 0px 0px 15px ' + settings.colors.font_glow + ', 0px 0px 20px ' + settings.colors.font_glow + ', 0px 0px 30px ' + settings.colors.font_glow + ' !important;}\
+	var css = '.main-page { width: 90%; font-size: ' + settings.font_size + 'px !important; color: #FFF !important; letter-spacing: 1px !important; text-shadow: 0px 0px 5px ' + settings.colors.font_glow + ', 0px 0px 10px ' + settings.colors.font_glow + ', 0px 0px 15px ' + settings.colors.font_glow + ', 0px 0px 20px ' + settings.colors.font_glow + ', 0px 0px 30px ' + settings.colors.font_glow + ' !important;}\
 body, .navbar-footer, .footer-wrap {background: rgba(0,0,0,0.8) !important; font-family: "Righteous", cursive !important; line-height: 1.4 !important;}\
 body {background: ' + settings.colors.background + ' !important; }\
 .main-page a {color: #FFF !important; text-shadow: 0px 0px 5px ' + settings.colors.link_glow + ', 0px 0px 10px ' + settings.colors.link_glow  + ', 0px 0px 15px ' + settings.colors.link_glow  + ', 0px 0px 20px ' + settings.colors.link_glow  + ', 0px 0px 30px ' + settings.colors.link_glow  + ' !important;}\
@@ -129,6 +143,7 @@ body {background: ' + settings.colors.background + ' !important; }\
 		"bg_input":"",
 		"bg":"",
 		"bg_shadow":"",
+		"light_mode":"",
 		"pre_defined":'<option value="0">1</option><option value="1">2</option><option value="2">3</option>'};
 
 	if(settings.block_ads){
@@ -137,21 +152,26 @@ body {background: ' + settings.colors.background + ' !important; }\
 	}
 
 	if(settings.background.shadow){
-		html.bg_shadow = '<input id="bg-shadow" name="bg-shadow" type="checkbox" checked><label for="bg-shadow"><label>';
+		html.bg_shadow = '<input id="bg-shadow" name="bg-shadow" type="checkbox" checked><label for="bg-shadow"></label>';
 		css += '.col-xs-12.col-lg-8.text-center { background: rgba(0,0,0,0.6) !important; box-shadow: 0 0 100px 100px rgba(0, 0, 0, 0.6) !important; }';
 	} else
-		html.bg_shadow = '<input id="bg-shadow" name="bg-shadow" type="checkbox"><label for="bg-shadow"><label>';
+		html.bg_shadow = '<input id="bg-shadow" name="bg-shadow" type="checkbox"><label for="bg-shadow"></label>';
+
+	if(settings.light_mode)
+		html.light_mode = '<input id="light-mode" name="light-mode" type="checkbox" checked><label for="light-mode"></label>';
+	else
+		html.light_mode = '<input id="light-mode" name="light-mode" type="checkbox"><label for="light-mode"></label>';
 
 	if(settings.background.type == "color"){
 		html.bg_type_select = '<select id="background-type"><option value="color" selected>Color</option> <option value="image">Image</option><option value="video">Video</option></select>';
 		html.bg_input = html.bg_inputs[0];
 	} else if(settings.background.type == "image"){
-		css += '.bg-div { background: '+ settings.colors.background +' url('+ settings.background.image +') no-repeat fixed; background-size: cover; filter: '+ settings.background.filter +'; position: fixed; top: 0px; left: 0px; width: 100%; height:100%; z-index: -10; }';
+		css += '.bg-div { background: '+ settings.colors.background +' url('+ settings.background.image +') no-repeat fixed; background-size: cover; -webkit-filter: '+ settings.background.filter +'; -moz-filter: '+ settings.background.filter +'; filter: '+ settings.background.filter +'; position: fixed; top: 0px; left: 0px; width: 100%; height:100%; z-index: -10; }';
 		html.bg = '<div class="bg-div"></div>';
 		html.bg_type_select = '<select id="background-type"><option value="color">Color</option><option value="image" selected>Image</option><option value="video">Video</option></select>';
 		html.bg_input = html.bg_inputs[1];
 	} else if(settings.background.type == "video"){
-		css += '#bg-vid { filter: '+ settings.background.filter +'; position: fixed; top: 0px; left: 0px; width: 100%; z-index: -10; }';
+		css += '#bg-vid { -webkit-filter: '+ settings.background.filter +'; -moz-filter: '+ settings.background.filter +'; filter: '+ settings.background.filter +'; position: fixed; top: 0px; left: 0px; width: 100%; z-index: -10; }';
 		html.bg = '<video id="bg-vid" autoplay loop poster="true"><source data-ng-src="'+ settings.background.video +'" src="'+ settings.background.video +'"></video>';
 		html.bg_type_select = '<select id="background-type"><option value="color">Color</option><option value="image">Image</option><option value="video" selected>Video</option></select>';
 		html.bg_input = html.bg_inputs[2];
@@ -197,19 +217,23 @@ body {background: ' + settings.colors.background + ' !important; }\
 		}, 100);
 
 		var settingsOutterDiv = document.createElement('div');
-		settingsOutterDiv.innerHTML = '<div class="settings"><table class="settings-table"><tbody>\
-<tr><td>Duration (seconds):</td><td><input id="duration" type="number" step="10" value=""></td>\
-<tr><td>Font Size (px):</td><td><input id="font-size" type="number" value="' + settings.font_size + '"></td></tr>\
-<tr><td>Font Glow Color:</td><td><input id="font-glow-color" type="color" value="' + settings.colors.font_glow + '"></td></tr>\
-<tr><td>Bold Font Glow Color:</td><td><input id="bold-font-glow-color" type="color" value="' + settings.colors.bold_font_glow + '"></td></tr>\
-<tr><td>Link Glow Color:</td><td><input id="link-glow-color" type="color" value="' + settings.colors.link_glow + '"></td></tr>\
-<tr><td>Background Type:</td><td>'+ html.bg_type_select +'</td></tr>\
-<tr id="bg-input">'+ html.bg_input +'</tr>\
-<tr><td>Background Shadow:</td><td>'+ html.bg_shadow +'</td></tr>\
-<tr><td>Background Filters:</td><td><select id="pre-defined-filters" class="pre-defined"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select><input id="background-filter" type="text" value="' + settings.background.filter + '"></td></tr>\
-<tr style="margin-top: 5px;"><td class="buttons"><button id="save" type="button">Save</button></td><td class="buttons"><button id="reset" type="button">Reset</button></td></tr>\
-</tbody></table> <a class="closeSettings"></a>\
-</div>  <a id="openSettings" class="openSettings" ></a> <a class="start"></a> <a class="stop">';
+		settingsOutterDiv.innerHTML = 
+			'<div class="settings"><table class="settings-table">\
+			    <tbody>\
+                    <tr><td>Duration (seconds):</td><td><input id="duration" type="number" step="10" value=""></td></tr>\
+                    <tr><td>Font Size (px):</td><td><input id="font-size" type="number" value="' + settings.font_size + '"></td></tr>\
+                    <tr><td>Font Glow Color:</td><td><input id="font-glow-color" type="color" value="' + settings.colors.font_glow + '"></td></tr>\
+                    <tr><td>Bold Font Glow Color:</td><td><input id="bold-font-glow-color" type="color" value="' + settings.colors.bold_font_glow + '"></td></tr>\
+                    <tr><td>Link Glow Color:</td><td><input id="link-glow-color" type="color" value="' + settings.colors.link_glow + '"></td></tr>\
+                    <tr><td>Background Type:</td><td>'+ html.bg_type_select +'</td></tr>\
+                    <tr id="bg-input">'+ html.bg_input +'</tr>\
+                    <tr><td>Background Shadow:</td><td>'+ html.bg_shadow +'</td></tr>\
+                    <tr><td>Background Filters:</td><td><select id="pre-defined-filters" class="pre-defined"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select><input id="background-filter" type="text" value="' + settings.background.filter + '"></td></tr>\
+                    <tr><td>Light Mode:</td><td>'+ html.light_mode +'</td></tr>\
+                    <tr style="margin-top: 5px;"><td class="buttons"><button id="save" type="button">Save</button></td><td class="buttons"><button id="reset" type="button">Reset</button></td></tr>\
+                </tbody></table> <a class="closeSettings"></a>\
+            </div>\
+            <a id="openSettings" class="openSettings" ></a> <a class="start"></a> <a class="stop">';
 		document.body.appendChild(settingsOutterDiv);
 		if(settings.background.type != "color"){
 			$('body').prepend(html.bg);
@@ -242,8 +266,19 @@ body {background: ' + settings.colors.background + ' !important; }\
 				$(".settings").hide(1000);
 			});
 			$('#save').click(function() {
-				saveSettings();
-				window.location.reload(true);
+				$('html, body').animate({
+					scrollTop: 0
+				}, {
+					duration: 0,
+					easing: 'linear',
+					complete: function() {
+						reCalculateDuration();
+						setTimeout( function() {
+							saveSettings();
+							window.location.reload(true);
+						}, 200);
+					}
+				});
 			});
 			$('#reset').click(function() {
 				if (confirm("Do you really want to reset color settings on all pages and duration time on current page?") === true) {
