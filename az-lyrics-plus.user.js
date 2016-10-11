@@ -64,7 +64,7 @@
 	var settings = GM_getValue("settings", JSON.stringify(initial_settings));
 	settings = JSON.parse(settings);
 
-	var duration, duration_copy, backgroundImage_copy = "", path, sliding = false;
+	var duration, duration_copy, path;
 
 	function calculateDuration() {
 		var duration, lines, height;
