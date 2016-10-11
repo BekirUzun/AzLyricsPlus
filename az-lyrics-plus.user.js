@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	AzLyrics +
 // @description Adds some extra functions to AzLyrics, changes theme and removes adds
-// @version     1.8.9
+// @version     1.9.0
 // @author      Bekir Uzun
 // @namespace   https://greasyfork.org/en/scripts/21458-azlyrics
 // @match       http://www.azlyrics.com/*
@@ -27,7 +27,7 @@
 	// disable script in Iframes
 	if (window.self!==window.top) { return; }
 
-	var initial_settings = {"light_mode": false, "font_size": 30, "block_ads": false, "background": {"type":"color", "shadow":true, "filter": "none", "image":"http://s21.postimg.org/klu7ak9mt/image.jpg", "video":"https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4", "filters":["grayscale(70%)", "grayscale(100%) blur(3px)", "grayscale(50%) blur(5px) brightness(70%)"], "images": ["https://s10.postimg.org/cfo4eg5mx/image.jpg","https://s21.postimg.org/qb8bgmy91/image.jpg","https://s12.postimg.org/783o9ixmj/image.jpg", "https://s21.postimg.org/klu7ak9mt/image.jpg"], "videos": ["https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4", "https://giant.gfycat.com/PartialSlowIriomotecat.mp4", "https://giant.gfycat.com/BestUncomfortableBagworm.mp4"] }, "colors": {"font_glow":"#0000FF", "bold_font_glow":"#00FFFF", "link_glow":"#FF0000", "background":"#000000" }};
+	var initial_settings = {"light_mode": false, "font_size": 30, "block_ads": true, "background": {"type":"color", "shadow":true, "filter": "none", "image":"http://s21.postimg.org/klu7ak9mt/image.jpg", "video":"https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4", "filters":["none", "grayscale(70%)", "grayscale(100%) blur(3px)", "grayscale(50%) blur(5px) brightness(70%)"], "images": ["https://s10.postimg.org/cfo4eg5mx/image.jpg","https://s21.postimg.org/qb8bgmy91/image.jpg","https://s12.postimg.org/783o9ixmj/image.jpg", "https://s21.postimg.org/klu7ak9mt/image.jpg"], "videos": ["https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4", "https://giant.gfycat.com/PartialSlowIriomotecat.mp4", "https://giant.gfycat.com/BestUncomfortableBagworm.mp4"] }, "colors": {"font":"#FFFFFF","font_glow":"#0000FF", "bold_font_glow":"#00FFFF", "link_glow":"#FF0000", "background":"#000000" }};
 	var settings = GM_getValue("settings", JSON.stringify(initial_settings));
 	settings = JSON.parse(settings);
 
@@ -52,11 +52,12 @@
 	}
 
 	function clearAds() {
-		$('.sky-ad, .top-ad, .fb-like, #cf_fb_id,  .ringtone, .col-xs-12.col-lg-8.text-center > div:nth-child(2), #fb-root, .col-xs-12.col-lg-8.text-center > .noprint.hidden-xs').hide().remove();
+		$('.sky-ad, .top-ad, .fb-like, #cf_fb_id, .ringtone, #fb-root, .col-xs-12.col-lg-8.text-center > div:nth-child(2), .col-xs-12.col-lg-8.text-center > .noprint.hidden-xs').hide().remove();
 	}
 
 	function saveSettings() {
 		settings.font_size = document.getElementById("font-size").value;
+		settings.colors.font = document.getElementById("font-color").value;
 		settings.colors.font_glow = document.getElementById("font-glow-color").value;
 		settings.colors.link_glow = document.getElementById("link-glow-color").value;
 		settings.colors.bold_font_glow = document.getElementById("bold-font-glow-color").value;
@@ -75,20 +76,26 @@
 			GM_setValue(path, duration);
 		}
 		settings.background.shadow = document.getElementById("bg-shadow").checked;
+		settings.block_ads = document.getElementById("block-ads").checked;
 
-		if (document.getElementById("light-mode").checked != settings.light_mode) {
-			if(document.getElementById("light-mode").checked){
-				GM_setValue("settings_normal_mode", JSON.stringify(settings)); // save old settings
-				settings.background.shadow = false;
-				settings.background.filter = "none";
-				settings.background.type = "color";
-				settings.light_mode = true;
-			} else {
-				settings = GM_getValue("settings_normal_mode", JSON.stringify(settings));
-				settings = JSON.parse(settings);
+		setTimeout( function() { //delayed this part because it temporarily fixed code. I think asynchornus js gives errors when setting new settings. some one fix this please :O
+			if (document.getElementById("light-mode").checked != settings.light_mode) {
+				if(document.getElementById("light-mode").checked){
+					var settings_old1 = settings;
+					GM_setValue("settings_old", JSON.stringify(settings_old1)); // save old settings
+					settings.background.shadow = false;
+					settings.background.filter = "none";
+					settings.background.type = "color";
+					settings.light_mode = true;
+				} else {
+					var settings_old2 = GM_getValue("settings_old", JSON.stringify(initial_settings));
+					settings_old2 = JSON.parse(settings_old2);
+					settings = settings_old2;
+					GM_deleteValue("settings_old");
+				}
 			}
-		}
-		GM_setValue("settings", JSON.stringify(settings));
+			GM_setValue("settings", JSON.stringify(settings));
+		}, 100);
 	}
 
 	function resetEverything() {
@@ -102,11 +109,12 @@
 	function resetSettings() {
 		GM_deleteValue(path);
 		GM_deleteValue("settings");
+		GM_deleteValue("settings_old");
 	}
 
-	var css = '.main-page { width: 90%; font-size: ' + settings.font_size + 'px !important; color: #FFF !important; letter-spacing: 1px !important; text-shadow: 0px 0px 5px ' + settings.colors.font_glow + ', 0px 0px 10px ' + settings.colors.font_glow + ', 0px 0px 15px ' + settings.colors.font_glow + ', 0px 0px 20px ' + settings.colors.font_glow + ', 0px 0px 30px ' + settings.colors.font_glow + ' !important;}\
+	var css = '.main-page { width: 90%; font-size: ' + settings.font_size + 'px !important; color: ' + settings.colors.font + ' !important; letter-spacing: 1px !important; text-shadow: 0px 0px 5px ' + settings.colors.font_glow + ', 0px 0px 10px ' + settings.colors.font_glow + ', 0px 0px 15px ' + settings.colors.font_glow + ', 0px 0px 20px ' + settings.colors.font_glow + ', 0px 0px 30px ' + settings.colors.font_glow + ' !important;}\
 body, .navbar-footer, .footer-wrap {background: rgba(0,0,0,0.8) !important; font-family: "Righteous", cursive !important; line-height: 1.4 !important;}\
-body {background: ' + settings.colors.background + ' !important; }\
+body { background: ' + settings.colors.background + ' !important; }\
 .main-page a {color: #FFF !important; text-shadow: 0px 0px 5px ' + settings.colors.link_glow + ', 0px 0px 10px ' + settings.colors.link_glow  + ', 0px 0px 15px ' + settings.colors.link_glow  + ', 0px 0px 20px ' + settings.colors.link_glow  + ', 0px 0px 30px ' + settings.colors.link_glow  + ' !important;}\
 .main-page b {color: #FFF !important; text-shadow: 0px 0px 5px ' + settings.colors.bold_font_glow + ', 0px 0px 10px ' + settings.colors.bold_font_glow  + ', 0px 0px 15px ' + settings.colors.bold_font_glow + ', 0px 0px 20px ' + settings.colors.bold_font_glow + ', 0px 0px 30px ' + settings.colors.bold_font_glow + ' !important;}\
 .navbar-default {background-color: #55F !important; border-color: #66F !important;}\
@@ -147,7 +155,7 @@ body {background: ' + settings.colors.background + ' !important; }\
 		"pre_defined":'<option value="0">1</option><option value="1">2</option><option value="2">3</option>'};
 
 	if(settings.block_ads){
-		css += '.sky-ad, .top-ad, .fb-like, .ringtone{ display: none !important; width: 0px !important; height: 0px !important}';
+		css += '.sky-ad, .top-ad, .fb-like, .ringtone, #cf_fb_id, .col-xs-12.col-lg-8.text-center > div:nth-child(2), .col-xs-12.col-lg-8.text-center > div.noprint.hidden-xs{ display: none !important; width: 0px !important; height: 0px !important}';
 		clearAds();
 	}
 
@@ -161,6 +169,11 @@ body {background: ' + settings.colors.background + ' !important; }\
 		html.light_mode = '<input id="light-mode" name="light-mode" type="checkbox" checked><label for="light-mode"></label>';
 	else
 		html.light_mode = '<input id="light-mode" name="light-mode" type="checkbox"><label for="light-mode"></label>';
+
+	if(settings.block_ads)
+		html.block_ads = '<input id="block-ads" name="block-ads" type="checkbox" checked><label for="block-ads"></label>';
+	else
+		html.block_ads = '<input id="block-ads" name="block-ads" type="checkbox"><label for="block-ads"></label>';
 
 	if(settings.background.type == "color"){
 		html.bg_type_select = '<select id="background-type"><option value="color" selected>Color</option> <option value="image">Image</option><option value="video">Video</option></select>';
@@ -217,18 +230,20 @@ body {background: ' + settings.colors.background + ' !important; }\
 		}, 100);
 
 		var settingsOutterDiv = document.createElement('div');
-		settingsOutterDiv.innerHTML = 
+		settingsOutterDiv.innerHTML =
 			'<div class="settings"><table class="settings-table">\
 			    <tbody>\
                     <tr><td>Duration (seconds):</td><td><input id="duration" type="number" step="10" value=""></td></tr>\
                     <tr><td>Font Size (px):</td><td><input id="font-size" type="number" value="' + settings.font_size + '"></td></tr>\
+                    <tr><td>Font Color:</td><td><input id="font-color" type="color" value="' + settings.colors.font + '"></td></tr>\
                     <tr><td>Font Glow Color:</td><td><input id="font-glow-color" type="color" value="' + settings.colors.font_glow + '"></td></tr>\
                     <tr><td>Bold Font Glow Color:</td><td><input id="bold-font-glow-color" type="color" value="' + settings.colors.bold_font_glow + '"></td></tr>\
                     <tr><td>Link Glow Color:</td><td><input id="link-glow-color" type="color" value="' + settings.colors.link_glow + '"></td></tr>\
                     <tr><td>Background Type:</td><td>'+ html.bg_type_select +'</td></tr>\
                     <tr id="bg-input">'+ html.bg_input +'</tr>\
                     <tr><td>Background Shadow:</td><td>'+ html.bg_shadow +'</td></tr>\
-                    <tr><td>Background Filters:</td><td><select id="pre-defined-filters" class="pre-defined"><option value="0">1</option><option value="1">2</option><option value="2">3</option></select><input id="background-filter" type="text" value="' + settings.background.filter + '"></td></tr>\
+                    <tr><td>Background Filters:</td><td><select id="pre-defined-filters" class="pre-defined"><option value="0">1</option><option value="1">2</option><option value="2">3</option><option value="3">4</option></select><input id="background-filter" type="text" value="' + settings.background.filter + '"></td></tr>\
+                    <tr><td>Block Ads:</td><td>'+ html.block_ads +'</td></tr>\
                     <tr><td>Light Mode:</td><td>'+ html.light_mode +'</td></tr>\
                     <tr style="margin-top: 5px;"><td class="buttons"><button id="save" type="button">Save</button></td><td class="buttons"><button id="reset" type="button">Reset</button></td></tr>\
                 </tbody></table> <a class="closeSettings"></a>\
@@ -254,13 +269,22 @@ body {background: ' + settings.colors.background + ' !important; }\
 			$("body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)").html('<div class="left">'+ left_html +'</div><div class="right">'+ right_html +'</div>');
         }, 250);
 */
+		console.log("settings_old - " + GM_getValue("settings_old", undefined));
+		console.log("settings - " + GM_getValue("settings", undefined));
+
 		if(settings.background.type == "video")
 			document.getElementById("bg-vid").playbackRate = 0.7;
+		//I think adding this to the settings menu is not really necessary.
+		//but if you want to, you can :')
 
 		if ($.fn.jquery !== "undefined") {
-			$('.openSettings, .closeSettings').click(function() {
+			$('.openSettings').click(function() {
 				reCalculateDuration();
-				$(".settings").toggle(1000);
+				$(".settings").show(800);
+			});
+			$('.closeSettings').click(function() {
+				reCalculateDuration();
+				$(".settings").hide(500);
 			});
 			$('.main-page').click(function() {
 				$(".settings").hide(1000);
@@ -275,7 +299,9 @@ body {background: ' + settings.colors.background + ' !important; }\
 						reCalculateDuration();
 						setTimeout( function() {
 							saveSettings();
-							window.location.reload(true);
+							setTimeout( function() {
+								window.location.reload(true); // page will reload after saveSettings() function done its job. look at line 81
+							}, 200);
 						}, 200);
 					}
 				});
@@ -340,12 +366,11 @@ body {background: ' + settings.colors.background + ' !important; }\
 					$("#background-video").val(settings.background.videos[index]);
 				});
 			}
-			$( window ).scroll(function() {
-				if(!settings.light_mode){
+			if(!settings.light_mode){
+				$( window ).scroll(function() {
 					reCalculateDuration();
-				}
-			});
-			clearAds();
+				});
+			}
 		}
 	}
 })();
