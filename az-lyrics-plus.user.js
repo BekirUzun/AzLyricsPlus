@@ -112,18 +112,16 @@
 		settings.block_ads = document.getElementById("block-ads").checked;
 
 		setTimeout( function() { //delayed this part because it temporarily fixed code. I think asynchornus js gives errors when setting new settings. some one fix this please :O
-			if (document.getElementById("light-mode").checked != settings.light_mode) {
+			if(document.getElementById("light-mode").checked != settings.light_mode) {
 				if(document.getElementById("light-mode").checked){
-					var settings_old1 = settings;
-					GM_setValue("settings_old", JSON.stringify(settings_old1)); // save old settings
+					GM_setValue("settings_old", JSON.stringify(settings)); // save old settings
 					settings.background.shadow = false;
 					settings.background.filter = "none";
 					settings.background.type = "color";
 					settings.light_mode = true;
 				} else {
-					var settings_old2 = GM_getValue("settings_old", JSON.stringify(initial_settings));
-					settings_old2 = JSON.parse(settings_old2);
-					settings = settings_old2;
+					var settings_old = GM_getValue("settings_old", JSON.stringify(initial_settings));
+					settings = JSON.parse(settings_old);
 					GM_deleteValue("settings_old");
 				}
 			}
