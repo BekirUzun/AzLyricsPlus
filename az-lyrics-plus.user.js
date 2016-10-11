@@ -27,7 +27,40 @@
 	// disable script in Iframes
 	if (window.self!==window.top) { return; }
 
-	var initial_settings = {"light_mode": false, "font_size": 30, "block_ads": true, "background": {"type":"color", "shadow":true, "filter": "none", "image":"http://s21.postimg.org/klu7ak9mt/image.jpg", "video":"https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4", "filters":["none", "grayscale(70%)", "grayscale(100%) blur(3px)", "grayscale(50%) blur(5px) brightness(70%)"], "images": ["https://s10.postimg.org/cfo4eg5mx/image.jpg","https://s21.postimg.org/qb8bgmy91/image.jpg","https://s12.postimg.org/783o9ixmj/image.jpg", "https://s21.postimg.org/klu7ak9mt/image.jpg"], "videos": ["https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4", "https://giant.gfycat.com/PartialSlowIriomotecat.mp4", "https://giant.gfycat.com/BestUncomfortableBagworm.mp4"] }, "colors": {"font":"#FFFFFF","font_glow":"#0000FF", "bold_font_glow":"#00FFFF", "link_glow":"#FF0000", "background":"#000000" }};
+	var initial_settings = {
+		"light_mode": false,
+		"font_size": 30,
+		"block_ads": true,
+		"background":{
+			"type":"color",
+			"shadow":true,
+			"filter": "none",
+			"image":"http://s21.postimg.org/klu7ak9mt/image.jpg",
+			"video":"https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4",
+			"filters":[
+				"none",
+				"grayscale(70%)",
+				"grayscale(100%) blur(3px)",
+				"grayscale(50%) blur(5px) brightness(70%)"
+			],
+			"images": [
+				"https://s10.postimg.org/cfo4eg5mx/image.jpg",
+				"https://s21.postimg.org/qb8bgmy91/image.jpg",
+				"https://s12.postimg.org/783o9ixmj/image.jpg",
+				"https://s21.postimg.org/klu7ak9mt/image.jpg"
+			],
+			"videos": ["https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4",
+					   "https://giant.gfycat.com/PartialSlowIriomotecat.mp4",
+					   "https://giant.gfycat.com/BestUncomfortableBagworm.mp4"
+					  ]
+		}, "colors": {
+			"font":"#FFFFFF",
+			"font_glow":"#0000FF",
+			"bold_font_glow":"#00FFFF",
+			"link_glow":"#FF0000",
+			"background":"#000000"
+		}
+	};
 	var settings = GM_getValue("settings", JSON.stringify(initial_settings));
 	settings = JSON.parse(settings);
 
@@ -300,7 +333,7 @@ body { background: ' + settings.colors.background + ' !important; }\
 						setTimeout( function() {
 							saveSettings();
 							setTimeout( function() {
-								window.location.reload(true); // page will reload after saveSettings() function done its job. look at line 81
+								window.location.reload(true); // page will reload after saveSettings() function done its job. look at line 114
 							}, 200);
 						}, 200);
 					}
