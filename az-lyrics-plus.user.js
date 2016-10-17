@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	AzLyrics +
 // @description Adds some extra functions to AzLyrics, changes theme and removes adds
-// @version     1.9.0
+// @version     1.9.1
 // @author      Bekir Uzun
 // @namespace   https://greasyfork.org/en/scripts/21458-azlyrics
 // @match       http://www.azlyrics.com/*
@@ -33,7 +33,7 @@
 		"block_ads": true,
 		"background":{
 			"type":"color",
-			"shadow":true,
+			"shadow": true,
 			"filter": "none",
 			"image":"http://s21.postimg.org/klu7ak9mt/image.jpg",
 			"video":"https://zippy.gfycat.com/AdvancedReasonableAbyssiniancat.mp4",
@@ -67,25 +67,25 @@
 	var duration, duration_copy, path;
 
 	function calculateDuration() {
-		var duration, lines, height;
-		height =  $('body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)').height();
+		var dur, lines, height;
+		height = $("#addsong").offset().top - $(".ringtone").offset().top;
 		lines = height / ( settings.font_size * 1.4 );
-		duration = (lines * 5 ).toFixed(1);
-		console.log( height, lines, duration );
+		dur = (lines * 4 ).toFixed(1);
+		console.log( height, lines, dur );
 		if (lines < 0)
-			duration = 0.5;
-		return duration;
+			dur = 0.5;
+		return dur;
 	}
 
 	function reCalculateDuration() {
-		duration = duration_copy - ($( document ).scrollTop() / (settings.font_size * 1.4 )) * 6;
+		duration = duration_copy - ($( document ).scrollTop() / (settings.font_size * 1.4 )) * 4;
 		if (duration <= 0)
 			duration = 0.5;
 		document.getElementById("duration").value = duration.toFixed(1);
 	}
 
 	function clearAds() {
-		$('.sky-ad, .top-ad, .fb-like, #cf_fb_id, .ringtone, #fb-root, .col-xs-12.col-lg-8.text-center > div:nth-child(2), .col-xs-12.col-lg-8.text-center > .noprint.hidden-xs').hide().remove();
+		$('.sky-ad, .top-ad, .fb-like, #cf_fb_id, #fb-root, .col-xs-12.col-lg-8.text-center > div:nth-child(2), .col-xs-12.col-lg-8.text-center > .noprint.hidden-xs').hide().remove();
 	}
 
 	function saveSettings() {
@@ -111,7 +111,7 @@
 		settings.background.shadow = document.getElementById("bg-shadow").checked;
 		settings.block_ads = document.getElementById("block-ads").checked;
 
-		setTimeout( function() { //delayed this part because it temporarily fixed code. I think asynchornus js gives errors when setting new settings. some one fix this please :O
+		setTimeout( function() { // delayed this part because it temporarily fixed code. Some one fix this please :O
 			if(document.getElementById("light-mode").checked != settings.light_mode) {
 				if(document.getElementById("light-mode").checked){
 					GM_setValue("settings_old", JSON.stringify(settings)); // save old settings
@@ -155,7 +155,7 @@ body { background: ' + settings.colors.background + ' !important; }\
 .btn.focus, .btn:focus, .btn:hover {background-color: #008 !important; border-color: #008 !important;}\
 .lboard-wrap, .links-menu-wrap {background-color: #33D !important; padding-bottom: 10px !important; position: relative; z-index: 5; }\
 @font-face {font-family: "Righteous"; font-style: normal; font-weight: 400; src: local("Righteous"), local("Righteous-Regular"), url(https://fonts.gstatic.com/s/righteous/v5/w5P-SI7QJQSDqB3GziL8XVtXRa8TVwTICgirnJhmVJw.woff2) format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;}\
-.settings {font-size: 12pt; width: 25em; position: fixed; top: 0px; right: 0px; background: #21B262; color: #ffffff; height: 100%; z-index: 99995; font-family: "Open Sans", Helvetica, sans-serif;  display: none; padding: 30px 20px 10px 20px;}\
+.settings { box-shadow: 0px 0px 10px rgba(0,0,0,0.7); font-size: 12pt; width: 25em; position: fixed; top: 0px; right: 0px; background: #21B262; color: #ffffff; height: 100%; z-index: 99995; font-family: "Open Sans", Helvetica, sans-serif;  display: none; padding: 30px 20px 10px 20px;}\
 .settings table {width: 100%;}\
 .settings td {padding: 3px 5px 3px 5px; line-height: 1.5em;}\
 .settings td:nth-child(even) { text-align: center; }\
@@ -186,7 +186,8 @@ body { background: ' + settings.colors.background + ' !important; }\
 		"pre_defined":'<option value="0">1</option><option value="1">2</option><option value="2">3</option>'};
 
 	if(settings.block_ads){
-		css += '.sky-ad, .top-ad, .fb-like, .ringtone, #cf_fb_id, .col-xs-12.col-lg-8.text-center > div:nth-child(2), .col-xs-12.col-lg-8.text-center > div.noprint.hidden-xs{ display: none !important; width: 0px !important; height: 0px !important}';
+		css += '.sky-ad, .top-ad, .fb-like, #cf_fb_id, .col-xs-12.col-lg-8.text-center > div:nth-child(2), .col-xs-12.col-lg-8.text-center > div.noprint.hidden-xs{ display: none !important; width: 0px !important; height: 0px !important}' +
+			'.ringtone { display: inline !important; height:1px !important; }';
 		clearAds();
 	}
 
@@ -253,12 +254,21 @@ body { background: ' + settings.colors.background + ' !important; }\
 		document.getElementsByClassName("pull-left")[0].src = 'https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az_lyrics_plus_logo.png';
 
 		var duration_interval = setInterval(function(){
-			duration = GM_getValue(path, calculateDuration());
-			duration_copy = duration;
-			if(duration > 0)
-				reCalculateDuration();
-			clearInterval(duration_interval);
-		}, 100);
+			$('html, body').animate({
+				scrollTop: 0
+			}, {
+				duration: 0,
+				easing: 'linear',
+				complete: function() {
+					duration = GM_getValue(path, calculateDuration());
+					if(duration > 0){
+						duration_copy = duration;
+						reCalculateDuration();
+						clearInterval(duration_interval);
+					}
+				}
+			});
+		}, 250);
 
 		var settingsOutterDiv = document.createElement('div');
 		settingsOutterDiv.innerHTML =
@@ -300,8 +310,6 @@ body { background: ' + settings.colors.background + ' !important; }\
 			$("body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)").html('<div class="left">'+ left_html +'</div><div class="right">'+ right_html +'</div>');
         }, 250);
 */
-		console.log("settings_old - " + GM_getValue("settings_old", undefined));
-		console.log("settings - " + GM_getValue("settings", undefined));
 
 		if(settings.background.type == "video")
 			document.getElementById("bg-vid").playbackRate = 0.7;
@@ -318,7 +326,7 @@ body { background: ' + settings.colors.background + ' !important; }\
 				$(".settings").hide(500);
 			});
 			$('.main-page').click(function() {
-				$(".settings").hide(1000);
+				$(".settings").hide(500);
 			});
 			$('#save').click(function() {
 				$('html, body').animate({
@@ -346,11 +354,9 @@ body { background: ' + settings.colors.background + ' !important; }\
 			$('.start').click(function() {
 				$('.start').toggle();
 				reCalculateDuration();
-				var lyrics_height = $('body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)').height();
-				var lyrics_position = $('body > div.container.main-page > div > div.col-xs-12.col-lg-8.text-center > div:nth-child(6)').offset().top;
 				var one_line_height = settings.font_size * 1.4;
 				$('html, body').animate({
-					scrollTop: lyrics_height + lyrics_position + one_line_height * 2.5 - window.innerHeight
+					scrollTop: $("#addsong").offset().top - window.innerHeight - (one_line_height * 2)
 				}, {
 					duration: duration * 1000,
 					easing: 'linear',
