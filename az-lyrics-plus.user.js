@@ -68,9 +68,9 @@
 
 	function calculateDuration() {
 		var dur, lines, height;
-		height = $("#addsong").offset().top - $(".ringtone").offset().top;
+		height = $("#addsong").offset().top - window.innerHeight - settings.font_size * 1.4 * 2 ; // $(".ringtone").offset().top;
 		lines = height / ( settings.font_size * 1.4 );
-		dur = (lines * 4 ).toFixed(1);
+		dur = (lines * 5 ).toFixed(1);
 		console.log( height, lines, dur );
 		if (lines < 0)
 			dur = 0.5;
@@ -78,8 +78,8 @@
 	}
 
 	function reCalculateDuration() {
-		duration = duration_copy - ($( document ).scrollTop() / (settings.font_size * 1.4 )) * 4;
-		if (duration <= 0)
+		duration = duration_copy - ($( document ).scrollTop() / (settings.font_size * 1.4 )) * 5;
+		if (duration <= 0.5)
 			duration = 0.5;
 		document.getElementById("duration").value = duration.toFixed(1);
 	}
