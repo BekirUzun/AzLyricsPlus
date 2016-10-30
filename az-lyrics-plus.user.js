@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name	AzLyrics +
 // @description Adds some extra functions to AzLyrics, changes theme and removes adds
-// @version     1.9.1
+// @version     2.0.0
 // @author      Bekir Uzun
 // @namespace   https://greasyfork.org/en/scripts/21458-azlyrics
 // @match       http://www.azlyrics.com/*
