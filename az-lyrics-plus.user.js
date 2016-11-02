@@ -68,7 +68,7 @@
 
 	function calculateDuration() {
 		var dur, lines, height;
-		height = $("#addsong").offset().top - window.innerHeight - settings.font_size * 1.4 * 2 ; // $(".ringtone").offset().top;
+		height = $("#addsong").offset().top - window.innerHeight - settings.font_size * 1.4 * 2 ;
 		lines = height / ( settings.font_size * 1.4 );
 		dur = (lines * 5 ).toFixed(1);
 		console.log( height, lines, dur );
@@ -82,10 +82,6 @@
 		if (duration <= 0.5)
 			duration = 0.5;
 		document.getElementById("duration").value = duration.toFixed(1);
-	}
-
-	function clearAds() {
-		$('.sky-ad, .top-ad, .fb-like, #cf_fb_id, #fb-root, .col-xs-12.col-lg-8.text-center > div:nth-child(2), .col-xs-12.col-lg-8.text-center > .noprint.hidden-xs').hide().remove();
 	}
 
 	function saveSettings() {
@@ -145,6 +141,7 @@
 
 	var css = '.main-page { width: 90%; font-size: ' + settings.font_size + 'px !important; color: ' + settings.colors.font + ' !important; letter-spacing: 1px !important; text-shadow: 0px 0px 5px ' + settings.colors.font_glow + ', 0px 0px 10px ' + settings.colors.font_glow + ', 0px 0px 15px ' + settings.colors.font_glow + ', 0px 0px 20px ' + settings.colors.font_glow + ', 0px 0px 30px ' + settings.colors.font_glow + ' !important;}\
 body, .navbar-footer, .footer-wrap {background: rgba(0,0,0,0.8) !important; font-family: "Righteous", cursive !important; line-height: 1.4 !important;}\
+.footer-wrap > .container > .noprint > img {filter: invert(100%) hue-rotate(195deg) saturate(300%);}\
 body { background: ' + settings.colors.background + ' !important; }\
 .main-page a {color: #FFF !important; text-shadow: 0px 0px 5px ' + settings.colors.link_glow + ', 0px 0px 10px ' + settings.colors.link_glow  + ', 0px 0px 15px ' + settings.colors.link_glow  + ', 0px 0px 20px ' + settings.colors.link_glow  + ', 0px 0px 30px ' + settings.colors.link_glow  + ' !important;}\
 .main-page b {color: #FFF !important; text-shadow: 0px 0px 5px ' + settings.colors.bold_font_glow + ', 0px 0px 10px ' + settings.colors.bold_font_glow  + ', 0px 0px 15px ' + settings.colors.bold_font_glow + ', 0px 0px 20px ' + settings.colors.bold_font_glow + ', 0px 0px 30px ' + settings.colors.bold_font_glow + ' !important;}\
@@ -186,9 +183,7 @@ body { background: ' + settings.colors.background + ' !important; }\
 		"pre_defined":'<option value="0">1</option><option value="1">2</option><option value="2">3</option>'};
 
 	if(settings.block_ads){
-		css += '.sky-ad, .top-ad, .fb-like, #cf_fb_id, .col-xs-12.col-lg-8.text-center > div:nth-child(2), .col-xs-12.col-lg-8.text-center > div.noprint.hidden-xs{ display: none !important; width: 0px !important; height: 0px !important}' +
-			'.ringtone { display: inline !important; height:1px !important; }';
-		clearAds();
+		css += '.ringtone, .addthis_toolbox.addthis_default_style:first-child, .sky-ad, .top-ad, .fb-like, #cf_fb_id, .col-xs-12.col-lg-8.text-center > .noprint.hidden-xs, .col-xs-12.col-lg-8.text-center > div:nth-child(2) { display: none !important; width: 0px !important; height: 0px !important}';
 	}
 
 	if(settings.background.shadow){
@@ -252,7 +247,7 @@ body { background: ' + settings.colors.background + ' !important; }\
 			document.getElementsByTagName("h2")[0].innerHTML = '<a href="' + artisturl + '" ><font size="35px">' + holder + '</font></a>';
 		}
 		document.getElementsByClassName("pull-left")[0].src = 'https://raw.githubusercontent.com/BekirUzun/AzLyricsPlus/master/az_lyrics_plus_logo.png';
-
+		
 		var duration_interval = setInterval(function(){
 			$('html, body').animate({
 				scrollTop: 0
