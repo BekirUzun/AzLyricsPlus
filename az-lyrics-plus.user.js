@@ -157,6 +157,7 @@ body { background: ' + settings.colors.background + ' !important; }\
 .settings td {padding: 3px 5px 3px 5px; line-height: 1.5em;}\
 .settings td:nth-child(even) { text-align: center; }\
 .settings tr:nth-child(even){ background: rgba(0,0,0,0.1); }\
+.settings select option {background: #3eb774; }\
 .settings td.buttons { width: 50%; padding: 5px 20px 5px 20px; }\
 .settings button {background-color: #ed4933; box-shadow: none !important; width: 90%; height: 1.5em; color: #fff; font-family: "Open Sans", Helvetica, sans-serif;	font-size: 14pt; font-weight: 400; letter-spacing: 0.1em; border: none; cursor: pointer;}\
 .settings input, .settings select {font-size: 12pt; color: #fff; font-family: "Open Sans", Helvetica, sans-serif; line-height: 1.5em; height: 1.5em; background: rgba(100, 100, 100, 0.25); border: none; padding: 0em 0em 0em 0.3em; text-decoration: none; width: 100px; }\
